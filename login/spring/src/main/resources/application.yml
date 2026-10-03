@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: login
+  data:
+    mongodb:
+      auto-index-creation: true
+      # Banco próprio do serviço de Login
+      uri: ${MONGO_URI:mongodb://localhost:27017/vaquinha-login?directConnection=true}
+
+jwt:
+  # Precisa ser IGUAL à chave configurada no gateway (mínimo 32 caracteres)
+  secret: ${JWT_SECRET:muuv-vaquinha-chave-secreta-jwt-2026-fatec-microsservicos}
+  expiration-minutes: 60
+
+cookie:
+  # true somente quando estiver rodando em HTTPS
+  secure: false
+
+app:
+  admin:
+    nome: Administrador
+    email: admin@muuv.com
+    senha: admin123
