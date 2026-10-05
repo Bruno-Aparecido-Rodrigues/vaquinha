@@ -1,0 +1,26 @@
+server:
+  port: 8083
+
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+      uri: mongodb://localhost:27017/vaquinha-doacao?directConnection=true
+  rabbitmq:
+    host: jaragua.lmq.cloudamqp.com
+    port: 5671
+    username: ejsjhrca
+    password: oic3iEg5Z1tzbHUk8Ex9GT0lQc0g0tOd
+    virtual-host: ejsjhrca
+    ssl:
+      enabled: true
+
+event:
+  exchange: vaquinha.eventos
+  campanha:
+    queue: doacao.campanha-eventos
+    routing-key: campanha.*
+  doacao-realizada:
+    routing-key: doacao.realizada
+  operacao:
+    routing-key: operacao.doacao
