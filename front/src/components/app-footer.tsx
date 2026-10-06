@@ -1,15 +1,13 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Logo } from './logo';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Colors } from '@/constants/colors';
 import { MAX_WIDTH, Spacing, Type } from '@/constants/theme';
 
 export default function AppFooter() {
-    const { isMd } = useBreakpoint();
     return (
         <View style={styles.footer}>
-            <View style={[styles.inner, isMd && styles.innerRow]}>
+            <View style={styles.inner}>
                 <Logo size={24} />
                 <Text style={styles.texto}>© 2026 Muuv Vaquinhas Online. Feito com afeto e cooperação.</Text>
             </View>
@@ -28,9 +26,10 @@ const styles = StyleSheet.create({
         maxWidth: MAX_WIDTH,
         alignSelf: 'center',
         paddingHorizontal: Spacing.gutter,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         gap: Spacing.md,
     },
-    innerRow: { flexDirection: 'row', justifyContent: 'space-between' },
     texto: { ...Type.bodySm, color: Colors.onSurfaceVariant, textAlign: 'center' },
 });

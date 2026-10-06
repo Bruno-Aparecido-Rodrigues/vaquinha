@@ -50,12 +50,6 @@ public class CampanhaController {
                 service.atualizar(CampanhaControllerAdapter.cast(request), usuarioId));
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/encerrar/{id}")
-    public CampanhaResponse encerrar(@PathVariable String id, @RequestHeader(USER_ID) String usuarioId) {
-        return CampanhaControllerAdapter.toResponse(service.encerrar(id, usuarioId));
-    }
-
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/delete/{id}")
     public void delete(@PathVariable String id, @RequestHeader(USER_ID) String usuarioId) {
@@ -84,7 +78,7 @@ public class CampanhaController {
         return CampanhaControllerAdapter.toResponse(service.buscar(id));
     }
 
-    // ---------- Tratamento de erros (devolve { "mensagem": "..." } para o site) ----------
+    // --- Tratamento de erros (devolve { "mensagem": "..." } para o site) ---
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

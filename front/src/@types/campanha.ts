@@ -4,7 +4,6 @@ export type Campanha = {
     id: string;
     titulo: string;
     descricao: string;
-    imagemUrl: string;
     meta: number;
     valorArrecadado: number;
     totalDoacoes: number;
@@ -20,7 +19,6 @@ export type CampanhaRequest = {
     descricao: string;
     meta: number;
     dataLimite: string;   // yyyy-MM-dd
-    imagemUrl: string;
 };
 
 export type CampanhaUpdateRequest = CampanhaRequest & {

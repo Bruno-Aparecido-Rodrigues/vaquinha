@@ -1,21 +1,17 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Screen, { Container } from '@/components/screen';
 import Button from '@/components/button';
 import Icon, { IconName } from '@/components/icon';
 import { EmptyView, ErrorView, LoadingView } from '@/components/state-views';
 import { Operacao, StatusOperacao } from '@/@types/relatorio';
 import { listarOperacoes } from '@/integration/relatorioIntegration';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { formatarHora, formatarMoeda } from '@/utils/format';
 import { mensagemErro } from '@/utils/errors';
 import { Colors } from '@/constants/colors';
 import { Fonts, Radius, Shadow, Spacing, Type } from '@/constants/theme';
 
-const INTERVALO_MS = 3000;
-
 type Aba = 'doacoes' | 'eventos';
-type FiltroStatus = 'TODAS' | StatusOperacao;
 
 const STATUS: Record<StatusOperacao, { label: string; icone: IconName; fundo: string; cor: string }> = {
     PENDENTE: { label: 'Pendente', icone: 'schedule', fundo: Colors.surfaceContainerHigh, cor: Colors.onSurfaceVariant },
@@ -25,8 +21,6 @@ const STATUS: Record<StatusOperacao, { label: string; icone: IconName; fundo: st
     RECUSADA: { label: 'Recusada', icone: 'block', fundo: Colors.errorContainer, cor: Colors.onErrorContainer },
     ERRO: { label: 'Erro', icone: 'error', fundo: Colors.error, cor: Colors.onError },
 };
-
-const FILTROS: FiltroStatus[] = ['TODAS', 'PENDENTE', 'PROCESSANDO', 'CONFLITO', 'CONCLUIDA', 'RECUSADA', 'ERRO'];
 
 const EVENTOS: Record<string, string> = {
     CAMPANHA_CRIADA: 'Campanha criada',
@@ -41,41 +35,26 @@ const EVENTOS: Record<string, string> = {
  * que chegaram ao serviço de Relatório pelo RabbitMQ.
  */
 export default function PainelAdmin() {
-    const { isMd, isLg } = useBreakpoint();
     const [operacoes, setOperacoes] = useState<Operacao[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
-    const [aoVivo, setAoVivo] = useState(true);
-    const [atualizadoEm, setAtualizadoEm] = useState<Date | null>(null);
     const [aba, setAba] = useState<Aba>('doacoes');
-    const [filtro, setFiltro] = useState<FiltroStatus>('TODAS');
-    const buscando = useRef(false);
 
     const carregar = useCallback(async () => {
-        if (buscando.current) return;
-        buscando.current = true;
         try {
             const lista = await listarOperacoes();
             lista.sort((a, b) => new Date(b.inicio).getTime() - new Date(a.inicio).getTime());
             setOperacoes(lista);
             setErro(null);
-            setAtualizadoEm(new Date());
         } catch (e) {
             setErro(mensagemErro(e, 'Não foi possível carregar o relatório.'));
         } finally {
-            buscando.current = false;
             setCarregando(false);
         }
     }, []);
 
+    // Carrega ao abrir a tela; depois, o botão "Atualizar" busca de novo
     useEffect(() => { carregar(); }, [carregar]);
-
-    // Atualização automática ("ao vivo") a cada 3 segundos
-    useEffect(() => {
-        if (!aoVivo) return;
-        const timer = setInterval(carregar, INTERVALO_MS);
-        return () => clearInterval(timer);
-    }, [aoVivo, carregar]);
 
     const doacoes = useMemo(() => operacoes.filter(o => o.tipo === 'DOACAO'), [operacoes]);
     const eventos = useMemo(() => operacoes.filter(o => o.tipo !== 'DOACAO'), [operacoes]);
@@ -92,16 +71,13 @@ export default function PainelAdmin() {
         };
     }, [doacoes]);
 
-    const lista = (aba === 'doacoes' ? doacoes : eventos)
-        .filter(o => filtro === 'TODAS' || o.status === filtro);
-
-    const colunasCards = isLg ? 5 : isMd ? 3 : 2;
+    const lista = aba === 'doacoes' ? doacoes : eventos;
 
     return (
         <Screen admin>
             <Container style={styles.pagina}>
                 {/* Cabeçalho */}
-                <View style={[styles.topo, isMd && styles.topoMd]}>
+                <View style={styles.topo}>
                     <View style={{ flexShrink: 1 }}>
                         <View style={styles.sobretitulo}>
                             <Icon name="analytics" size={18} color={Colors.secondary} />
@@ -109,23 +85,11 @@ export default function PainelAdmin() {
                         </View>
                         <Text style={styles.h1}>Monitor de Operações</Text>
                         <Text style={styles.subtitulo}>
-                            Acompanhe em tempo real as transações de doação, a disputa por concorrência e os eventos recebidos pelo RabbitMQ.
+                            Acompanhe as transações de doação, a disputa por concorrência e os eventos recebidos pelo RabbitMQ.
                         </Text>
                     </View>
-                    <View style={styles.controles}>
-                        <Pressable onPress={() => setAoVivo(v => !v)} style={[styles.aoVivo, !aoVivo && styles.pausado]}>
-                            <View style={[styles.pontoVivo, !aoVivo && { backgroundColor: Colors.outline }]} />
-                            <Text style={[styles.aoVivoTexto, !aoVivo && { color: Colors.onSurfaceVariant }]}>
-                                {aoVivo ? 'Ao vivo' : 'Pausado'}
-                            </Text>
-                            <Icon name={aoVivo ? 'pause' : 'play-arrow'} size={16} color={aoVivo ? Colors.onPrimaryFixed : Colors.onSurfaceVariant} />
-                        </Pressable>
-                        <Button title="Atualizar" icone="refresh" variante="tonal" tamanho="sm" onPress={carregar} />
-                    </View>
+                    <Button title="Atualizar" icone="refresh" variante="tonal" tamanho="sm" onPress={carregar} />
                 </View>
-                {atualizadoEm ? (
-                    <Text style={styles.atualizado}>Atualizado às {formatarHora(atualizadoEm.toISOString())}</Text>
-                ) : null}
 
                 {/* Cartões de resumo */}
                 <View style={styles.cards}>
@@ -136,7 +100,7 @@ export default function PainelAdmin() {
                         { label: 'Com conflito', valor: String(resumo.conflitos), icone: 'bolt' as IconName, cor: Colors.onWarningContainer },
                         { label: 'Recusadas / erro', valor: String(resumo.recusadas), icone: 'block' as IconName, cor: Colors.error },
                     ].map(card => (
-                        <View key={card.label} style={[styles.cardCelula, { width: `${100 / colunasCards}%` as const }]}>
+                        <View key={card.label} style={[styles.cardCelula, { width: '20%' }]}>
                             <View style={styles.card}>
                                 <View style={styles.cardTopo}>
                                     <Text style={styles.cardLabel}>{card.label}</Text>
@@ -155,23 +119,12 @@ export default function PainelAdmin() {
                 </View>
 
                 {/* Abas */}
-                <View style={[styles.abas, !isMd && styles.abasMobile]}>
+                <View style={styles.abas}>
                     <AbaBotao texto={`Doações (${doacoes.length})`} icone="volunteer-activism" ativa={aba === 'doacoes'}
-                              onPress={() => { setAba('doacoes'); setFiltro('TODAS'); }} />
-                    <AbaBotao texto={`${isMd ? 'Eventos do CRUD' : 'Eventos'} (${eventos.length})`} icone="campaign" ativa={aba === 'eventos'}
-                              onPress={() => { setAba('eventos'); setFiltro('TODAS'); }} />
+                              onPress={() => setAba('doacoes')} />
+                    <AbaBotao texto={`Eventos do CRUD (${eventos.length})`} icone="campaign" ativa={aba === 'eventos'}
+                              onPress={() => setAba('eventos')} />
                 </View>
-
-                {/* Filtro por status */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtros}>
-                    {FILTROS.map(f => (
-                        <Pressable key={f} onPress={() => setFiltro(f)} style={[styles.filtro, filtro === f && styles.filtroAtivo]}>
-                            <Text style={[styles.filtroTexto, filtro === f && { color: Colors.onSurface }]}>
-                                {f === 'TODAS' ? 'Todas' : STATUS[f].label}
-                            </Text>
-                        </Pressable>
-                    ))}
-                </ScrollView>
 
                 {/* Lista */}
                 {carregando ? (
@@ -183,11 +136,11 @@ export default function PainelAdmin() {
                         icone="inbox"
                         titulo="Nenhuma operação por aqui"
                         descricao={aba === 'doacoes'
-                            ? 'Quando alguém doar (ou o k6 disparar várias doações), as operações aparecem aqui em tempo real.'
+                            ? 'Quando alguém doar (ou o k6 disparar várias doações), clique em Atualizar para ver as operações.'
                             : 'Os eventos de criar, atualizar e excluir aparecem aqui assim que chegam pelo RabbitMQ.'}
                     />
                 ) : aba === 'doacoes' ? (
-                    isLg ? <TabelaDoacoes operacoes={lista} /> : <CardsDoacoes operacoes={lista} />
+                    <TabelaDoacoes operacoes={lista} />
                 ) : (
                     <ListaEventos operacoes={lista} />
                 )}
@@ -256,30 +209,6 @@ function TabelaDoacoes({ operacoes }: { operacoes: Operacao[] }) {
     );
 }
 
-function CardsDoacoes({ operacoes }: { operacoes: Operacao[] }) {
-    return (
-        <View style={{ gap: Spacing.sm }}>
-            {operacoes.map(o => (
-                <View key={o.operacaoId} style={styles.opCard}>
-                    <View style={styles.opCardTopo}>
-                        <StatusBadge status={o.status} />
-                        <Text style={styles.opHora}>{formatarHora(o.inicio)} · {duracao(o)}</Text>
-                    </View>
-                    <Text style={styles.opTitulo} numberOfLines={1}>{o.campanhaTitulo ?? '—'}</Text>
-                    <View style={styles.opLinha}>
-                        <Text style={styles.opTexto}>{o.usuarioNome ?? '—'}</Text>
-                        <Text style={styles.opValor}>{o.valor != null ? formatarMoeda(o.valor) : '—'}</Text>
-                    </View>
-                    <Text style={[styles.opTexto, (o.tentativas ?? 1) > 1 && styles.tdAlerta]}>
-                        {o.tentativas ?? 1} {(o.tentativas ?? 1) === 1 ? 'tentativa' : 'tentativas'}
-                        {o.motivo ? ` · ${o.motivo}` : ''}
-                    </Text>
-                </View>
-            ))}
-        </View>
-    );
-}
-
 function ListaEventos({ operacoes }: { operacoes: Operacao[] }) {
     return (
         <View style={styles.tabela}>
@@ -304,26 +233,11 @@ function ListaEventos({ operacoes }: { operacoes: Operacao[] }) {
 
 const styles = StyleSheet.create({
     pagina: { paddingVertical: Spacing.xl },
-    topo: { gap: Spacing.md },
-    topoMd: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+    topo: { gap: Spacing.md, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
     sobretitulo: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.xs },
     sobretituloTexto: { ...Type.labelSm, fontFamily: Fonts.semibold, letterSpacing: 1.2, color: Colors.secondary },
     h1: { ...Type.headlineLg, color: Colors.onSurface },
     subtitulo: { ...Type.bodySm, color: Colors.onSurfaceVariant, marginTop: 4, maxWidth: 640 },
-    controles: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-    aoVivo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: Radius.full,
-        backgroundColor: Colors.primaryFixed,
-    },
-    pausado: { backgroundColor: Colors.surfaceContainerHigh },
-    pontoVivo: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
-    aoVivoTexto: { ...Type.labelMd, color: Colors.onPrimaryFixed },
-    atualizado: { ...Type.labelSm, fontFamily: Fonts.medium, color: Colors.outline, marginTop: Spacing.sm },
     cards: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6, marginTop: Spacing.lg },
     cardCelula: { padding: 6 },
     card: {
@@ -356,15 +270,11 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.surfaceContainer,
         alignSelf: 'flex-start',
         maxWidth: '100%',
+        marginBottom: Spacing.md,
     },
-    abasMobile: { alignSelf: 'stretch' },
     aba: { flexGrow: 1, justifyContent: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: Radius.xl, flexShrink: 1 },
     abaAtiva: { backgroundColor: Colors.surfaceContainerLowest, ...Shadow.sm },
     abaTexto: { ...Type.labelMd, color: Colors.onSurfaceVariant, flexShrink: 1 },
-    filtros: { gap: Spacing.sm, paddingVertical: Spacing.md },
-    filtro: { paddingHorizontal: Spacing.md, paddingVertical: 6, borderRadius: Radius.full, backgroundColor: Colors.surfaceContainerLow },
-    filtroAtivo: { backgroundColor: Colors.surfaceContainerHigh, ...Shadow.sm },
-    filtroTexto: { ...Type.labelMd, color: Colors.onSurfaceVariant },
     tabela: {
         backgroundColor: Colors.surfaceContainerLowest,
         borderRadius: Radius.xxl,
@@ -389,19 +299,6 @@ const styles = StyleSheet.create({
         borderRadius: Radius.full,
     },
     badgeTexto: { ...Type.labelSm },
-    opCard: {
-        backgroundColor: Colors.surfaceContainerLowest,
-        borderRadius: Radius.xxl,
-        padding: Spacing.md,
-        gap: 6,
-        ...Shadow.sm,
-    },
-    opCardTopo: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-    opHora: { ...Type.labelSm, fontFamily: Fonts.medium, color: Colors.outline },
-    opTitulo: { ...Type.labelLg, color: Colors.onSurface },
-    opLinha: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-    opTexto: { ...Type.bodySm, color: Colors.onSurfaceVariant, flexShrink: 1 },
-    opValor: { ...Type.labelLg, fontFamily: Fonts.bold, color: Colors.primary },
     evento: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingHorizontal: Spacing.md, paddingVertical: 12 },
     eventoIcone: {
         width: 36,

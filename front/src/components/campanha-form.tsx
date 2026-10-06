@@ -4,12 +4,10 @@ import { router } from 'expo-router';
 import Button from './button';
 import Icon from './icon';
 import TextField from './text-field';
-import CampanhaImage from './campanha-image';
 import { Container } from './screen';
 import { Campanha } from '@/@types/campanha';
 import { atualizarCampanha, criarCampanha } from '@/integration/campanhaIntegration';
 import { useToast } from '@/context/ToastContext';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import {
     dataBrParaIso, diasRestantes, formatarMoeda, formatarNumero, isoParaDataBr, mascaraData, mascaraMoeda, parseValor,
 } from '@/utils/format';
@@ -19,17 +17,15 @@ import { Fonts, Radius, Shadow, Spacing, Type } from '@/constants/theme';
 
 const MAX_TITULO = 80;
 
-/** Formulário único para criar e editar vaquinha (título, descrição, meta, data limite e link da foto). */
+/** Formulário único para criar e editar vaquinha (título, descrição, meta e data limite). */
 export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
     const editando = !!campanha;
     const { showToast } = useToast();
-    const { isMd, isSm } = useBreakpoint();
 
     const [titulo, setTitulo] = useState(campanha?.titulo ?? '');
     const [descricao, setDescricao] = useState(campanha?.descricao ?? '');
     const [metaTexto, setMetaTexto] = useState(campanha ? formatarNumero(campanha.meta) : '');
     const [dataTexto, setDataTexto] = useState(campanha ? isoParaDataBr(campanha.dataLimite) : '');
-    const [imagemUrl, setImagemUrl] = useState(campanha?.imagemUrl ?? '');
     const [salvando, setSalvando] = useState(false);
     const [erroServidor, setErroServidor] = useState<string | null>(null);
 
@@ -37,7 +33,6 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
     const meta = parseValor(metaTexto);
     const dataIso = dataBrParaIso(dataTexto);
     const dias = dataIso ? diasRestantes(dataIso) : null;
-    const urlValida = /^https?:\/\/\S+$/i.test(imagemUrl.trim());
 
     const metaAbaixo = editando && metaTexto !== '' && meta < metaMinima;
 
@@ -49,9 +44,8 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
         if (metaAbaixo) return 'Corrija o valor da meta para salvar';
         if (!dataIso) return 'Informe a data limite no formato dd/mm/aaaa';
         if (dias !== null && dias < 0) return 'A data limite não pode estar no passado';
-        if (!urlValida) return 'Informe um link de imagem começando com http:// ou https://';
         return null;
-    }, [titulo, descricao, meta, metaAbaixo, dataIso, dias, urlValida]);
+    }, [titulo, descricao, meta, metaAbaixo, dataIso, dias]);
 
     function voltar() {
         if (router.canGoBack()) router.back();
@@ -67,7 +61,6 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
             descricao: descricao.trim(),
             meta,
             dataLimite: dataIso,
-            imagemUrl: imagemUrl.trim(),
         };
         try {
             if (campanha) {
@@ -88,7 +81,7 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
     }
 
     return (
-        <Container maxWidth={820} style={[styles.pagina, isSm && styles.paginaSm]}>
+        <Container maxWidth={820} style={styles.pagina}>
             <View style={styles.topo}>
                 <View style={styles.selo}>
                     <View style={styles.seloPonto} />
@@ -100,7 +93,7 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
                         </>
                     ) : null}
                 </View>
-                <View style={[styles.tituloRow, isSm && styles.tituloRowSm]}>
+                <View style={styles.tituloRow}>
                     <Text style={styles.h1}>{editando ? 'Editar Campanha' : 'Criar Campanha'}</Text>
                     <Text style={styles.subtitulo}>
                         {editando
@@ -110,7 +103,7 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
                 </View>
             </View>
 
-            <View style={[styles.form, isSm && styles.formSm]}>
+            <View style={styles.form}>
                 <TextField
                     label="Título da Vaquinha"
                     labelDireita={`${titulo.length}/${MAX_TITULO}`}
@@ -130,7 +123,7 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
                     placeholder="Descreva quem será ajudado, quais os custos e a importância de cada contribuição..."
                 />
 
-                <View style={[styles.grid, isMd && styles.gridMd]}>
+                <View style={styles.grid}>
                     {/* META */}
                     <View style={styles.coluna}>
                         <View style={styles.metaLabelRow}>
@@ -199,27 +192,6 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
                     </View>
                 </View>
 
-                {/* FOTO */}
-                <View style={[styles.fotoRow, isSm && styles.fotoRowSm]}>
-                    <View style={styles.fotoCampo}>
-                        <TextField
-                            label="Link da Foto de Capa (URL)"
-                            value={imagemUrl}
-                            onChangeText={setImagemUrl}
-                            placeholder="https://exemplo.com/minha-imagem.jpg"
-                            autoCapitalize="none"
-                            keyboardType="url"
-                            icone="image"
-                        />
-                        <Text style={styles.dica}>Recomendamos imagens horizontais nítidas (16:9) em formato JPG ou PNG.</Text>
-                    </View>
-                    {urlValida ? (
-                        <View style={styles.preview}>
-                            <CampanhaImage uri={imagemUrl.trim()} />
-                        </View>
-                    ) : null}
-                </View>
-
                 {erroServidor ? (
                     <View style={styles.bannerErro}>
                         <Icon name="error" size={20} color={Colors.error} />
@@ -227,9 +199,9 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
                     </View>
                 ) : null}
 
-                <View style={[styles.acoes, isSm && styles.acoesSm]}>
+                <View style={styles.acoes}>
                     <Button title="Cancelar" variante="tonal" onPress={voltar} disabled={salvando} />
-                    <View style={[styles.acoesDireita, isSm && styles.acoesDireitaSm]}>
+                    <View style={styles.acoesDireita}>
                         {problema ? <Text style={styles.hint}>{problema}</Text> : null}
                         <Button
                             title={editando ? 'Salvar Alterações' : 'Criar Vaquinha'}
@@ -247,8 +219,7 @@ export default function CampanhaForm({ campanha }: { campanha?: Campanha }) {
 }
 
 const styles = StyleSheet.create({
-    pagina: { paddingVertical: Spacing.lg },
-    paginaSm: { paddingVertical: Spacing.xl },
+    pagina: { paddingVertical: Spacing.xl },
     topo: { marginBottom: Spacing.lg, gap: Spacing.xs },
     selo: {
         flexDirection: 'row',
@@ -265,20 +236,17 @@ const styles = StyleSheet.create({
     seloTexto: { ...Type.labelSm, color: Colors.onSurfaceVariant },
     seloSeparador: { ...Type.labelSm, color: Colors.outline },
     seloTitulo: { ...Type.labelSm, fontFamily: Fonts.medium, color: Colors.onSurface, flexShrink: 1 },
-    tituloRow: { gap: Spacing.xs },
-    tituloRowSm: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap' },
+    tituloRow: { gap: Spacing.xs, flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap' },
     h1: { ...Type.headlineLg, color: Colors.onSurface },
     subtitulo: { ...Type.bodySm, color: Colors.onSurfaceVariant },
     form: {
         backgroundColor: Colors.surfaceContainerLowest,
         borderRadius: Radius.xl,
-        padding: Spacing.md,
+        padding: Spacing.xl,
         gap: Spacing.lg,
         ...Shadow.md,
     },
-    formSm: { padding: Spacing.xl },
-    grid: { gap: Spacing.md },
-    gridMd: { flexDirection: 'row', alignItems: 'flex-start' },
+    grid: { gap: Spacing.md, flexDirection: 'row', alignItems: 'flex-start' },
     coluna: { flex: 1, gap: Spacing.xs },
     metaLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8, minHeight: 22 },
     label: { ...Type.labelLg, color: Colors.onSurface },
@@ -307,22 +275,8 @@ const styles = StyleSheet.create({
         marginTop: Spacing.xs,
     },
     infoDataTexto: { ...Type.bodySm, color: Colors.onSurfaceVariant, flex: 1 },
-    fotoRow: { gap: Spacing.md },
-    fotoRowSm: { flexDirection: 'row', alignItems: 'flex-start' },
-    fotoCampo: { flex: 1, gap: Spacing.xs },
-    dica: { ...Type.bodySm, color: Colors.onSurfaceVariant },
-    preview: {
-        width: 176,
-        aspectRatio: 16 / 10,
-        borderRadius: Radius.xl,
-        overflow: 'hidden',
-        alignSelf: 'center',
-        marginTop: 24,
-    },
-    acoes: { paddingTop: Spacing.md, gap: Spacing.md, flexDirection: 'column-reverse' },
-    acoesSm: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    acoesDireita: { gap: Spacing.sm },
-    acoesDireitaSm: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 1 },
+    acoes: { paddingTop: Spacing.md, gap: Spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    acoesDireita: { gap: Spacing.sm, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flexShrink: 1 },
     hint: { ...Type.bodySm, fontFamily: Fonts.medium, color: Colors.error, flexShrink: 1, textAlign: 'right' },
     botaoSalvar: { paddingHorizontal: Spacing.xl, paddingVertical: 14 },
 });

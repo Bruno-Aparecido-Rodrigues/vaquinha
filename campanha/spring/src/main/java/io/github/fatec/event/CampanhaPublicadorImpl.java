@@ -33,11 +33,6 @@ public class CampanhaPublicadorImpl implements CampanhaPublicador {
     }
 
     @Override
-    public void encerrada(Campanha campanha) {
-        publicar("campanha.encerrada", "ENCERRADA", campanha);
-    }
-
-    @Override
     public void excluida(Campanha campanha) {
         publicar("campanha.excluida", "EXCLUIDA", campanha);
     }

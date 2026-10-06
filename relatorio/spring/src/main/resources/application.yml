@@ -1,0 +1,25 @@
+server:
+  port: 8084
+
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+      uri: mongodb://localhost:27017/vaquinha-relatorio?directConnection=true
+  rabbitmq:
+    host: jaragua.lmq.cloudamqp.com
+    port: 5671
+    username: ejsjhrca
+    password: oic3iEg5Z1tzbHUk8Ex9GT0lQc0g0tOd
+    virtual-host: ejsjhrca
+    ssl:
+      enabled: true
+
+event:
+  exchange: vaquinha.eventos
+  operacao:
+    queue: relatorio.operacoes
+    routing-key: operacao.doacao
+  campanha:
+    queue: relatorio.campanha-eventos
+    routing-key: campanha.*

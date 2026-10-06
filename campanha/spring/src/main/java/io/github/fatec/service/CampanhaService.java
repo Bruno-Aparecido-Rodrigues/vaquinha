@@ -82,18 +82,6 @@ public class CampanhaService {
         return salva;
     }
 
-    public Campanha encerrar(String id, String usuarioId) {
-        Campanha atual = buscarDoDono(id, usuarioId);
-
-        if (atual.status() == StatusCampanha.ENCERRADA) {
-            throw new IllegalStateException("Esta campanha já está encerrada");
-        }
-
-        Campanha salva = repository.update(comStatus(atual, StatusCampanha.ENCERRADA, true));
-        publicador.encerrada(salva);
-        return salva;
-    }
-
     public void excluir(String id, String usuarioId) {
         Campanha atual = buscarDoDono(id, usuarioId);
 

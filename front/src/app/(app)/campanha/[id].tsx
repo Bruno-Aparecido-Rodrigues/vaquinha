@@ -1,8 +1,7 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Screen, { Container } from '@/components/screen';
-import CampanhaImage from '@/components/campanha-image';
 import ProgressBar from '@/components/progress-bar';
 import Button from '@/components/button';
 import Icon from '@/components/icon';
@@ -13,7 +12,6 @@ import { Doacao, DoacaoResponse } from '@/@types/doacao';
 import { buscarCampanha } from '@/integration/campanhaIntegration';
 import { listarDoacoesDaCampanha } from '@/integration/doacaoIntegration';
 import { useToast } from '@/context/ToastContext';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import {
     codigoCampanha, diasRestantes, formatarDataLonga, formatarMoeda, formatarMoedaCurta, percentual, podeDoar,
     tempoRelativo, valorRestante,
@@ -22,13 +20,9 @@ import { mensagemErro } from '@/utils/errors';
 import { Colors } from '@/constants/colors';
 import { Fonts, Radius, Shadow, Spacing, Type } from '@/constants/theme';
 
-const DOACOES_INICIAIS = 4;
-type Ordem = 'recentes' | 'maiores';
-
-/** Página da vaquinha (abre ao apertar "Apoiar"): foto, descrição, doações e o botão que abre o modal. */
+/** Página da vaquinha (abre ao apertar "Apoiar"): descrição, doações e o botão que abre o modal. */
 export default function DetalheCampanha() {
     const { id } = useLocalSearchParams<{ id: string }>();
-    const { isLg, isMd } = useBreakpoint();
     const { showToast } = useToast();
 
     const [campanha, setCampanha] = useState<Campanha | null>(null);
@@ -36,8 +30,6 @@ export default function DetalheCampanha() {
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
     const [modalAberto, setModalAberto] = useState(false);
-    const [ordem, setOrdem] = useState<Ordem>('recentes');
-    const [verTodas, setVerTodas] = useState(false);
 
     const carregar = useCallback(async () => {
         if (!id) return;
@@ -54,13 +46,6 @@ export default function DetalheCampanha() {
     }, [id]);
 
     useFocusEffect(useCallback(() => { carregar(); }, [carregar]));
-
-    const ordenadas = useMemo(() => {
-        const copia = [...doacoes];
-        if (ordem === 'maiores') copia.sort((a, b) => b.valor - a.valor);
-        else copia.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-        return copia;
-    }, [doacoes, ordem]);
 
     function doacaoConcluida(resposta: DoacaoResponse) {
         setModalAberto(false);
@@ -83,7 +68,6 @@ export default function DetalheCampanha() {
     const restante = valorRestante(campanha);
     const dias = diasRestantes(campanha.dataLimite);
     const aceitaDoacao = podeDoar(campanha);
-    const listaVisivel = verTodas ? ordenadas : ordenadas.slice(0, DOACOES_INICIAIS);
 
     let textoPrazo = `Encerra em ${dias} dias`;
     if (campanha.status === 'ENCERRADA') textoPrazo = 'Arrecadação encerrada';
@@ -109,16 +93,10 @@ export default function DetalheCampanha() {
                 <Text style={styles.metaTexto}>•</Text>
                 <Text style={styles.metaTexto}>Cód. {codigoCampanha(campanha.id)}</Text>
             </View>
-            <Text style={[isMd ? Type.display : Type.displayMobile, { color: Colors.onSurface }]}>{campanha.titulo}</Text>
+            <Text style={[Type.display, { color: Colors.onSurface }]}>{campanha.titulo}</Text>
             <Text style={styles.organizador}>
                 Organizado por <Text style={styles.organizadorNome}>{campanha.criadorNome}</Text>
             </Text>
-        </View>
-    );
-
-    const foto = (
-        <View style={[styles.foto, { height: isMd ? 380 : 240 }]}>
-            <CampanhaImage uri={campanha.imagemUrl} />
         </View>
     );
 
@@ -126,7 +104,7 @@ export default function DetalheCampanha() {
         <View style={styles.resumo}>
             <View style={styles.resumoValores}>
                 <View style={styles.arrecadadoRow}>
-                    <Text style={[isMd ? Type.display : Type.displayMobile, styles.arrecadado]}>
+                    <Text style={[Type.display, styles.arrecadado]}>
                         {formatarMoedaCurta(campanha.valorArrecadado)}
                     </Text>
                     <Text style={styles.arrecadadoLabel}>arrecadados</Text>
@@ -162,10 +140,10 @@ export default function DetalheCampanha() {
     );
 
     const detalhes = (
-        <View style={[styles.cartao, !isMd && styles.cartaoMobile]}>
+        <View style={styles.cartao}>
             <View style={styles.cartaoTitulo}>
-                <Icon name="description" size={isMd ? 28 : 24} color={Colors.primary} />
-                <Text style={[styles.h2, !isMd && styles.h2Mobile]}>Detalhes da vaquinha</Text>
+                <Icon name="description" size={28} color={Colors.primary} />
+                <Text style={styles.h2}>Detalhes da vaquinha</Text>
             </View>
             {campanha.descricao.split(/\n+/).filter(p => p.trim()).map((paragrafo, i) => (
                 <Text key={i} style={i === 0 ? styles.paragrafoPrincipal : styles.paragrafo}>{paragrafo}</Text>
@@ -174,12 +152,12 @@ export default function DetalheCampanha() {
     );
 
     const listaDoacoes = (
-        <View style={[styles.cartao, !isMd && styles.cartaoMobile]}>
+        <View style={styles.cartao}>
             <View style={styles.doacoesTopo}>
                 <View style={{ flexShrink: 1 }}>
                     <View style={styles.cartaoTitulo}>
-                        <Icon name="volunteer-activism" size={isMd ? 28 : 24} color={Colors.primary} />
-                        <Text style={[styles.h2, !isMd && styles.h2Mobile]}>Doações Recentes</Text>
+                        <Icon name="volunteer-activism" size={28} color={Colors.primary} />
+                        <Text style={styles.h2}>Doações</Text>
                     </View>
                     <Text style={styles.doacoesSub}>
                         {doacoes.length === 0
@@ -187,16 +165,10 @@ export default function DetalheCampanha() {
                             : `${doacoes.length} ${doacoes.length === 1 ? 'pessoa unida' : 'pessoas unidas'} por esta causa`}
                     </Text>
                 </View>
-                {doacoes.length > 1 ? (
-                    <View style={styles.ordem}>
-                        <OrdemChip texto="Mais recentes" ativo={ordem === 'recentes'} onPress={() => setOrdem('recentes')} />
-                        <OrdemChip texto="Maiores valores" ativo={ordem === 'maiores'} onPress={() => setOrdem('maiores')} />
-                    </View>
-                ) : null}
             </View>
 
             <View style={{ gap: Spacing.sm }}>
-                {listaVisivel.map(d => (
+                {doacoes.map(d => (
                     <View key={d.id} style={styles.doacao}>
                         <View style={{ flexShrink: 1, gap: 2 }}>
                             <Text style={styles.doador} numberOfLines={1}>{d.doadorNome}</Text>
@@ -206,41 +178,20 @@ export default function DetalheCampanha() {
                     </View>
                 ))}
             </View>
-
-            {doacoes.length > DOACOES_INICIAIS ? (
-                <Button
-                    variante="tonal"
-                    title={verTodas ? 'Mostrar menos' : `Ver todos os ${doacoes.length} apoios`}
-                    iconeDireita={verTodas ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-                    onPress={() => setVerTodas(v => !v)}
-                    style={{ alignSelf: 'center' }}
-                />
-            ) : null}
         </View>
     );
 
     return (
         <Screen>
             <Container style={styles.pagina}>
-                {isLg ? (
-                    <View style={styles.colunas}>
-                        <View style={styles.colunaEsquerda}>
-                            {cabecalho}
-                            {foto}
-                            {detalhes}
-                            {listaDoacoes}
-                        </View>
-                        <View style={styles.colunaDireita}>{resumo}</View>
-                    </View>
-                ) : (
-                    <View style={styles.pilha}>
+                <View style={styles.colunas}>
+                    <View style={styles.colunaEsquerda}>
                         {cabecalho}
-                        {foto}
-                        {resumo}
                         {detalhes}
                         {listaDoacoes}
                     </View>
-                )}
+                    <View style={styles.colunaDireita}>{resumo}</View>
+                </View>
             </Container>
 
             <DoacaoModal
@@ -254,27 +205,17 @@ export default function DetalheCampanha() {
     );
 }
 
-function OrdemChip({ texto, ativo, onPress }: { texto: string; ativo: boolean; onPress: () => void }) {
-    return (
-        <Pressable onPress={onPress} style={[styles.chip, ativo && styles.chipAtivo]}>
-            <Text style={[styles.chipTexto, ativo && { color: Colors.onSurface }]}>{texto}</Text>
-        </Pressable>
-    );
-}
-
 const styles = StyleSheet.create({
     pagina: { paddingTop: Spacing.lg, paddingBottom: Spacing.xl },
     colunas: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.xl },
     colunaEsquerda: { flex: 2, gap: Spacing.xl, minWidth: 0 },
     colunaDireita: { flex: 1, minWidth: 360 },
-    pilha: { gap: Spacing.lg },
     cabecalho: { gap: Spacing.xs },
     metaLinha: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: Spacing.sm },
     metaTexto: { ...Type.labelSm, color: Colors.onSurfaceVariant },
     metaPrazo: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     organizador: { ...Type.bodySm, color: Colors.onSurfaceVariant, marginTop: Spacing.xs },
     organizadorNome: { ...Type.labelLg, fontFamily: Fonts.bold, color: Colors.onSurface },
-    foto: { borderRadius: Radius.xl, overflow: 'hidden', backgroundColor: Colors.surfaceContainer, ...Shadow.sm },
     resumo: {
         backgroundColor: Colors.surfaceContainerLowest,
         padding: Spacing.lg,
@@ -300,18 +241,12 @@ const styles = StyleSheet.create({
         gap: Spacing.md,
         ...Shadow.sm,
     },
-    cartaoMobile: { padding: Spacing.md },
     cartaoTitulo: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
     h2: { ...Type.headlineMd, color: Colors.onSurface },
-    h2Mobile: { ...Type.headlineSm, fontFamily: Fonts.bold },
     paragrafoPrincipal: { ...Type.bodyLg, color: Colors.onSurface },
     paragrafo: { ...Type.bodyMd, color: Colors.onSurfaceVariant },
     doacoesTopo: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
     doacoesSub: { ...Type.bodySm, color: Colors.onSurfaceVariant, marginTop: 2 },
-    ordem: { flexDirection: 'row', gap: 8 },
-    chip: { paddingHorizontal: Spacing.md, paddingVertical: 4, borderRadius: Radius.full },
-    chipAtivo: { backgroundColor: Colors.surfaceContainer },
-    chipTexto: { ...Type.labelSm, color: Colors.outline },
     doacao: {
         flexDirection: 'row',
         justifyContent: 'space-between',

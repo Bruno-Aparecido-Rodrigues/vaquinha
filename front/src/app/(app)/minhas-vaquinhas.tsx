@@ -1,36 +1,29 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Screen, { Container } from '@/components/screen';
-import CampanhaImage from '@/components/campanha-image';
 import ProgressBar from '@/components/progress-bar';
 import Button from '@/components/button';
 import Icon, { IconName } from '@/components/icon';
 import ConfirmDialog from '@/components/confirm-dialog';
 import { EmptyView, ErrorView, LoadingView } from '@/components/state-views';
 import { Campanha } from '@/@types/campanha';
-import { encerrarCampanha, excluirCampanha, listarMinhasCampanhas } from '@/integration/campanhaIntegration';
-import { useToast } from '@/context/ToastContext';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { formatarMoedaCurta, percentual, textoPrazo } from '@/utils/format';
+import { excluirCampanha, listarMinhasCampanhas } from '@/integration/campanhaIntegration';
+import { diasRestantes, formatarMoedaCurta, percentual, textoPrazo } from '@/utils/format';
 import { mensagemErro } from '@/utils/errors';
 import { Colors } from '@/constants/colors';
 import { Fonts, Radius, Shadow, Spacing, Type } from '@/constants/theme';
 
-type Filtro = 'todas' | 'ativas' | 'encerradas';
-type Acao = { tipo: 'encerrar' | 'excluir'; campanha: Campanha } | null;
 
 const estaAtiva = (c: Campanha) => c.status !== 'ENCERRADA';
 
 export default function MinhasVaquinhas() {
-    const { isSm } = useBreakpoint();
-    const { showToast } = useToast();
     const [campanhas, setCampanhas] = useState<Campanha[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
-    const [filtro, setFiltro] = useState<Filtro>('todas');
-    const [acao, setAcao] = useState<Acao>(null);
+    const [excluindo, setExcluindo] = useState<Campanha | null>(null);
     const [executando, setExecutando] = useState(false);
+    const [erroExclusao, setErroExclusao] = useState<string | null>(null);
 
     const carregar = useCallback(async () => {
         setErro(null);
@@ -47,30 +40,17 @@ export default function MinhasVaquinhas() {
 
     useFocusEffect(useCallback(() => { carregar(); }, [carregar]));
 
-    const contagem = useMemo(() => ({
-        todas: campanhas.length,
-        ativas: campanhas.filter(estaAtiva).length,
-        encerradas: campanhas.filter(c => !estaAtiva(c)).length,
-    }), [campanhas]);
-
-    const visiveis = campanhas.filter(c =>
-        filtro === 'todas' ? true : filtro === 'ativas' ? estaAtiva(c) : !estaAtiva(c));
-
-    async function confirmarAcao() {
-        if (!acao) return;
+    async function confirmarExclusao() {
+        if (!excluindo) return;
         setExecutando(true);
+        setErroExclusao(null);
         try {
-            if (acao.tipo === 'encerrar') {
-                await encerrarCampanha(acao.campanha.id);
-                showToast({ titulo: 'Campanha encerrada', descricao: 'Novas doações foram interrompidas.' });
-            } else {
-                await excluirCampanha(acao.campanha.id);
-                showToast({ titulo: 'Vaquinha excluída', descricao: `"${acao.campanha.titulo}" foi removida.`, icone: 'delete' });
-            }
-            setAcao(null);
+            await excluirCampanha(excluindo.id);
+            setExcluindo(null);
             carregar();
         } catch (e) {
-            showToast({ titulo: 'Não foi possível concluir', descricao: mensagemErro(e), tipo: 'erro' });
+            setExcluindo(null);
+            setErroExclusao(mensagemErro(e, 'Não foi possível excluir a vaquinha.'));
         } finally {
             setExecutando(false);
         }
@@ -80,7 +60,7 @@ export default function MinhasVaquinhas() {
         <Screen ativo="minhas-vaquinhas">
             <Container style={styles.pagina}>
                 {/* Cabeçalho */}
-                <View style={[styles.topo, isSm && styles.topoSm]}>
+                <View style={styles.topo}>
                     <View style={{ flexShrink: 1 }}>
                         <View style={styles.sobretitulo}>
                             <Icon name="spa" size={18} color={Colors.secondary} />
@@ -97,81 +77,62 @@ export default function MinhasVaquinhas() {
                     />
                 </View>
 
-                {/* Filtros */}
-                <View style={styles.filtros}>
-                    <FiltroChip texto={`Todas as campanhas (${contagem.todas})`} ativo={filtro === 'todas'} onPress={() => setFiltro('todas')} />
-                    <FiltroChip texto={`Ativas (${contagem.ativas})`} ativo={filtro === 'ativas'} onPress={() => setFiltro('ativas')} />
-                    <FiltroChip texto={`Encerradas (${contagem.encerradas})`} ativo={filtro === 'encerradas'} onPress={() => setFiltro('encerradas')} />
-                </View>
+                {erroExclusao ? (
+                    <View style={styles.bannerErro}>
+                        <Icon name="error" size={18} color={Colors.error} />
+                        <Text style={styles.bannerErroTexto}>{erroExclusao}</Text>
+                    </View>
+                ) : null}
 
                 {carregando ? (
                     <LoadingView texto="Carregando suas vaquinhas..." />
                 ) : erro ? (
                     <ErrorView mensagem={erro} onRetry={() => { setCarregando(true); carregar(); }} />
-                ) : visiveis.length === 0 ? (
+                ) : campanhas.length === 0 ? (
                     <EmptyView
                         icone="spa"
-                        titulo={campanhas.length === 0 ? 'Você ainda não criou nenhuma vaquinha' : 'Nada por aqui'}
-                        descricao={campanhas.length === 0 ? 'Crie sua primeira campanha e comece a arrecadar.' : 'Nenhuma campanha neste filtro.'}
-                        acao={campanhas.length === 0
-                            ? <Button title="Criar minha primeira vaquinha" icone="add" onPress={() => router.push('/vaquinha/nova')} />
-                            : undefined}
+                        titulo="Você ainda não criou nenhuma vaquinha"
+                        descricao="Crie sua primeira campanha e comece a arrecadar."
+                        acao={<Button title="Criar minha primeira vaquinha" icone="add" onPress={() => router.push('/vaquinha/nova')} />}
                     />
                 ) : (
                     <View style={styles.lista}>
-                        {visiveis.map(c => (
-                            <LinhaCampanha
-                                key={c.id}
-                                campanha={c}
-                                onEncerrar={() => setAcao({ tipo: 'encerrar', campanha: c })}
-                                onExcluir={() => setAcao({ tipo: 'excluir', campanha: c })}
-                            />
+                        {campanhas.map(c => (
+                            <LinhaCampanha key={c.id} campanha={c} onExcluir={() => setExcluindo(c)} />
                         ))}
                     </View>
                 )}
             </Container>
 
             <ConfirmDialog
-                visible={acao !== null}
-                titulo={acao?.tipo === 'excluir' ? 'Excluir vaquinha?' : 'Encerrar arrecadação?'}
-                mensagem={acao?.tipo === 'excluir'
-                    ? 'Tem certeza de que deseja excluir esta campanha? Esta ação é permitida pois a vaquinha ainda não recebeu nenhuma doação.'
-                    : 'Deseja realmente encerrar a arrecadação desta campanha? Novas doações serão interrompidas, mas o histórico permanecerá visível.'}
-                textoConfirmar={acao?.tipo === 'excluir' ? 'Excluir' : 'Encerrar'}
-                icone={acao?.tipo === 'excluir' ? 'delete' : 'highlight-off'}
-                perigo={acao?.tipo === 'excluir'}
+                visible={excluindo !== null}
+                titulo="Excluir vaquinha?"
+                mensagem="Tem certeza de que deseja excluir esta campanha? Esta ação é permitida pois a vaquinha ainda não recebeu nenhuma doação."
+                textoConfirmar="Excluir"
+                icone="delete"
+                perigo
                 loading={executando}
-                onConfirmar={confirmarAcao}
-                onCancelar={() => setAcao(null)}
+                onConfirmar={confirmarExclusao}
+                onCancelar={() => setExcluindo(null)}
             />
         </Screen>
     );
 }
 
-function FiltroChip({ texto, ativo, onPress }: { texto: string; ativo: boolean; onPress: () => void }) {
-    return (
-        <Pressable onPress={onPress} style={[styles.filtro, ativo && styles.filtroAtivo]}>
-            <Text style={[styles.filtroTexto, ativo && styles.filtroTextoAtivo]}>{texto}</Text>
-        </Pressable>
-    );
-}
-
-function LinhaCampanha({ campanha, onEncerrar, onExcluir }: {
-    campanha: Campanha;
-    onEncerrar: () => void;
-    onExcluir: () => void;
-}) {
-    const { isLg, isSm } = useBreakpoint();
+function LinhaCampanha({ campanha, onExcluir }: { campanha: Campanha; onExcluir: () => void }) {
     const pct = percentual(campanha.valorArrecadado, campanha.meta);
     const ativa = estaAtiva(campanha);
     const temDoacoes = campanha.totalDoacoes > 0;
     const metaBatida = campanha.status === 'META_ATINGIDA' || pct >= 100;
+    const prazoVencido = diasRestantes(campanha.dataLimite) < 0;
 
     const selo: { texto: string; icone?: IconName; fundo: string; cor: string } = !ativa
         ? { texto: 'Encerrada', icone: 'check-circle', fundo: Colors.secondaryFixed, cor: Colors.onSecondaryFixed }
         : metaBatida
             ? { texto: 'Meta atingida', icone: 'celebration', fundo: Colors.primaryFixed, cor: Colors.onPrimaryFixed }
-            : { texto: 'Ativa', fundo: 'rgba(255, 255, 255, 0.92)', cor: Colors.primary };
+            : prazoVencido
+                ? { texto: 'Prazo encerrado', icone: 'event-busy', fundo: Colors.secondaryFixed, cor: Colors.onSecondaryFixed }
+                : { texto: 'Ativa', fundo: Colors.surfaceContainerHigh, cor: Colors.primary };
 
     let apoio: { icone: IconName; texto: string };
     if (!ativa) apoio = { icone: 'volunteer-activism', texto: `Finalizada com ${campanha.totalDoacoes} ${campanha.totalDoacoes === 1 ? 'apoiador' : 'apoiadores'}` };
@@ -187,19 +148,14 @@ function LinhaCampanha({ campanha, onEncerrar, onExcluir }: {
 
     return (
         <View style={[styles.linha, !ativa && { opacity: 0.95 }]}>
-            <View style={[styles.linhaInner, isLg && styles.linhaInnerLg]}>
-                {/* Foto + selo */}
-                <View style={[styles.foto, isLg && styles.fotoLg]}>
-                    <CampanhaImage uri={campanha.imagemUrl} cinza={!ativa} />
-                    <View style={[styles.selo, { backgroundColor: selo.fundo }]}>
-                        {selo.icone ? <Icon name={selo.icone} size={14} color={selo.cor} /> : <View style={styles.seloPonto} />}
-                        <Text style={[styles.seloTexto, { color: selo.cor }]}>{selo.texto}</Text>
-                    </View>
-                </View>
-
+            <View style={styles.linhaInner}>
                 {/* Informações */}
                 <View style={styles.info}>
                     <View style={styles.infoTopo}>
+                        <View style={[styles.selo, { backgroundColor: selo.fundo }]}>
+                            {selo.icone ? <Icon name={selo.icone} size={14} color={selo.cor} /> : <View style={styles.seloPonto} />}
+                            <Text style={[styles.seloTexto, { color: selo.cor }]}>{selo.texto}</Text>
+                        </View>
                         <Text style={styles.prazo}>{ativa ? textoPrazo(campanha.dataLimite).toUpperCase() : 'ENCERRADA'}</Text>
                         <Text style={styles.ponto}>•</Text>
                         <View style={styles.iconeTexto}>
@@ -229,13 +185,11 @@ function LinhaCampanha({ campanha, onEncerrar, onExcluir }: {
                 </View>
 
                 {/* Ações */}
-                <View style={[styles.acoes, isSm && !isLg && styles.acoesSm, isLg && styles.acoesLg]}>
+                <View style={styles.acoes}>
                     {ativa ? (
                         <>
                             <Button title="Editar" icone="tune" variante="suave" tamanho="sm" style={styles.acao}
                                     onPress={() => router.push(`/vaquinha/${campanha.id}/editar`)} />
-                            <Button title="Encerrar" icone="highlight-off" variante="tonal" tamanho="sm" style={styles.acao}
-                                    onPress={onEncerrar} />
                             {!temDoacoes ? (
                                 <Button title="Excluir" icone="delete" variante="perigo" tamanho="sm" style={styles.acao}
                                         onPress={onExcluir} />
@@ -253,23 +207,22 @@ function LinhaCampanha({ campanha, onEncerrar, onExcluir }: {
 
 const styles = StyleSheet.create({
     pagina: { paddingVertical: Spacing.xl },
-    topo: { gap: Spacing.md, marginBottom: Spacing.xl },
-    topoSm: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    topo: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md, marginBottom: Spacing.xl },
     sobretitulo: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: Spacing.xs },
     sobretituloTexto: { ...Type.labelSm, fontFamily: Fonts.semibold, letterSpacing: 1.2, color: Colors.secondary },
     h1: { ...Type.headlineLg, color: Colors.onSurface },
     subtitulo: { ...Type.bodySm, color: Colors.onSurfaceVariant, marginTop: 4 },
     botaoNova: { alignSelf: 'flex-start', borderRadius: Radius.xxl },
-    filtros: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm, marginBottom: Spacing.lg },
-    filtro: {
-        paddingHorizontal: Spacing.md,
-        paddingVertical: 8,
-        borderRadius: Radius.full,
-        backgroundColor: Colors.surfaceContainerLow,
+    bannerErro: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: Spacing.xs,
+        padding: Spacing.sm,
+        marginBottom: Spacing.lg,
+        borderRadius: Radius.xl,
+        backgroundColor: Colors.errorContainer,
     },
-    filtroAtivo: { backgroundColor: Colors.surfaceContainerHigh, ...Shadow.sm },
-    filtroTexto: { ...Type.labelMd, color: Colors.onSurfaceVariant },
-    filtroTextoAtivo: { color: Colors.onSurface },
+    bannerErroTexto: { ...Type.bodySm, color: Colors.onErrorContainer, flex: 1 },
     lista: { gap: Spacing.lg },
     linha: {
         backgroundColor: Colors.surfaceContainerLowest,
@@ -278,21 +231,14 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         ...Shadow.sm,
     },
-    linhaInner: { gap: Spacing.lg },
-    linhaInnerLg: { flexDirection: 'row', alignItems: 'center' },
-    foto: { width: '100%', height: 160, borderRadius: Radius.xxl, overflow: 'hidden' },
-    fotoLg: { width: 192 },
+    linhaInner: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
     selo: {
-        position: 'absolute',
-        top: 12,
-        left: 12,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
         paddingHorizontal: 12,
         paddingVertical: 4,
         borderRadius: Radius.full,
-        ...Shadow.sm,
     },
     seloPonto: { width: 8, height: 8, borderRadius: 4, backgroundColor: Colors.primary },
     seloTexto: { ...Type.labelSm },
@@ -310,8 +256,6 @@ const styles = StyleSheet.create({
     pctTexto: { ...Type.labelMd, fontFamily: Fonts.bold, color: Colors.primary },
     aviso: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
     avisoTexto: { ...Type.labelSm, fontFamily: Fonts.medium, flexShrink: 1 },
-    acoes: { gap: 10 },
-    acoesSm: { flexDirection: 'row' },
-    acoesLg: { width: 176 },
+    acoes: { gap: 10, width: 176 },
     acao: { flexGrow: 1, paddingVertical: 10 },
 });

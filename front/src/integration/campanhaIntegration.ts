@@ -29,11 +29,6 @@ export async function atualizarCampanha(request: CampanhaUpdateRequest): Promise
     return res.data;
 }
 
-export async function encerrarCampanha(id: string): Promise<Campanha> {
-    const res = await campanhaApi.put<Campanha>(`/encerrar/${id}`);
-    return res.data;
-}
-
 export async function excluirCampanha(id: string): Promise<void> {
     await campanhaApi.delete(`/delete/${id}`);
 }

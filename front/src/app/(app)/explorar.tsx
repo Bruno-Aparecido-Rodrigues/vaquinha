@@ -8,15 +8,14 @@ import Icon from '@/components/icon';
 import { EmptyView, ErrorView, LoadingView } from '@/components/state-views';
 import { Campanha } from '@/@types/campanha';
 import { listarCampanhas } from '@/integration/campanhaIntegration';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { mensagemErro } from '@/utils/errors';
 import { Colors } from '@/constants/colors';
 import { Fonts, Radius, Shadow, Spacing, Type } from '@/constants/theme';
 
 const POR_PAGINA = 9;
+const COLUNAS = 3;
 
 export default function Explorar() {
-    const { isMd, isLg } = useBreakpoint();
     const [campanhas, setCampanhas] = useState<Campanha[]>([]);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState<string | null>(null);
@@ -50,13 +49,12 @@ export default function Explorar() {
     const paginaAtual = Math.min(pagina, totalPaginas);
     const inicio = (paginaAtual - 1) * POR_PAGINA;
     const visiveis = filtradas.slice(inicio, inicio + POR_PAGINA);
-    const colunas = isLg ? 3 : isMd ? 2 : 1;
 
     return (
         <Screen ativo="explorar">
             {/* Título */}
             <Container style={styles.hero}>
-                <Text style={[isMd ? Type.display : Type.displayMobile, styles.heroTitulo]}>
+                <Text style={[Type.display, styles.heroTitulo]}>
                     Apoie causas e transforme vidas
                 </Text>
                 <Text style={styles.heroSub}>Descubra vaquinhas e faça sua contribuição com rapidez e segurança.</Text>
@@ -86,16 +84,16 @@ export default function Explorar() {
                     />
                 ) : (
                     <>
-                        {/* Grade de 1, 2 ou 3 colunas */}
+                        {/* Grade de 3 colunas */}
                         <View style={styles.grade}>
                             {visiveis.map(c => (
-                                <View key={c.id} style={[styles.celula, { width: `${100 / colunas}%` as const }]}>
+                                <View key={c.id} style={[styles.celula, { width: `${100 / COLUNAS}%` as const }]}>
                                     <CampanhaCard campanha={c} />
                                 </View>
                             ))}
                         </View>
 
-                        <View style={[styles.paginacao, isMd && styles.paginacaoMd]}>
+                        <View style={styles.paginacao}>
                             <Text style={styles.contagem}>
                                 Mostrando <Text style={styles.negrito}>{inicio + 1} - {inicio + visiveis.length}</Text> de{' '}
                                 {filtradas.length} {filtradas.length === 1 ? 'campanha ativa' : 'campanhas ativas'}
@@ -154,12 +152,13 @@ const styles = StyleSheet.create({
     grade: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -12 },
     celula: { padding: 12 },
     paginacao: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         gap: Spacing.md,
         paddingTop: Spacing.md,
         paddingBottom: Spacing.xl,
     },
-    paginacaoMd: { flexDirection: 'row', justifyContent: 'space-between' },
     contagem: { ...Type.labelSm, fontFamily: Fonts.medium, color: Colors.onSurfaceVariant },
     negrito: { fontFamily: Fonts.bold, color: Colors.onSurface },
     paginas: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'center' },

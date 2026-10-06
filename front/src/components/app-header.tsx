@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { Logo } from './logo';
 import Icon from './icon';
 import { useAuth } from '@/context/AuthContext';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Colors } from '@/constants/colors';
 import { MAX_WIDTH, Radius, Spacing, Type } from '@/constants/theme';
 
@@ -22,7 +21,6 @@ type Props = {
 
 export default function AppHeader({ ativo, admin = false }: Props) {
     const { usuario, signOut } = useAuth();
-    const { isMd } = useBreakpoint();
 
     async function sair() {
         await signOut();
@@ -55,15 +53,15 @@ export default function AppHeader({ ativo, admin = false }: Props) {
 
     return (
         <View style={styles.header}>
-            <View style={[styles.inner, !isMd && styles.innerMobile]}>
+            <View style={styles.inner}>
                 <View style={styles.esquerda}>
                     <Pressable onPress={() => router.push(admin ? '/painel' : '/explorar')} accessibilityRole="link">
-                        <Logo subtitulo={isMd ? (admin ? 'Admin' : 'Vaquinhas') : undefined} />
+                        <Logo subtitulo={admin ? 'Admin' : 'Vaquinhas'} />
                     </Pressable>
-                    {isMd ? nav : null}
+                    {nav}
                 </View>
                 <View style={styles.direita}>
-                    {isMd && usuario ? <Text style={styles.nome} numberOfLines={1}>{usuario.nome}</Text> : null}
+                    {usuario ? <Text style={styles.nome} numberOfLines={1}>{usuario.nome}</Text> : null}
                     <Pressable
                         onPress={sair}
                         style={({ pressed }) => [styles.sair, pressed && styles.navItemPress]}
@@ -74,7 +72,6 @@ export default function AppHeader({ ativo, admin = false }: Props) {
                     </Pressable>
                 </View>
             </View>
-            {!isMd ? <View style={styles.navMobile}>{nav}</View> : null}
         </View>
     );
 }
@@ -96,11 +93,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         gap: Spacing.lg,
     },
-    innerMobile: { height: 64, paddingHorizontal: Spacing.gutterMobile },
     esquerda: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg, flexShrink: 1 },
     direita: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, flexShrink: 0 },
     nav: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-    navMobile: { paddingHorizontal: Spacing.gutterMobile, paddingBottom: Spacing.sm },
     navItem: { paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm, borderRadius: Radius.xl },
     navItemAtivo: { backgroundColor: Colors.surfaceContainerHigh },
     navItemPress: { backgroundColor: Colors.surfaceContainer },

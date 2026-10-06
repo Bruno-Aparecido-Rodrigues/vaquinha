@@ -1,0 +1,34 @@
+# Build do Maven (classes compiladas e .jar)
+**/target/
+
+# IntelliJ
+.idea/
+**/.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# VS Code
+.vscode/
+
+# Front (Expo / Node)
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Sistema e logs
+.DS_Store
+Thumbs.db
+*.log

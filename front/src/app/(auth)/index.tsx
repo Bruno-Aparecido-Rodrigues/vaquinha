@@ -3,8 +3,6 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { Redirect, router } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/context/ToastContext';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { LogoBadge } from '@/components/logo';
 import TextField from '@/components/text-field';
 import Button from '@/components/button';
@@ -17,8 +15,6 @@ type Aba = 'login' | 'cadastro';
 
 export default function LoginCadastro() {
     const { isAuthenticated, isAdmin, isLoading, signIn, signUp } = useAuth();
-    const { showToast } = useToast();
-    const { isMd } = useBreakpoint();
     const [aba, setAba] = useState<Aba>('login');
 
     // login
@@ -54,14 +50,9 @@ export default function LoginCadastro() {
         setErro('');
     }
 
+    // ADMIN vai para o Painel; CLIENTE vai para o Explorar
     function entrarNaArea(u: Usuario) {
-        if (u.roles.includes('ADMIN')) {
-            showToast({ titulo: 'Conexão confirmada!', descricao: 'Perfil ADMIN detectado. Abrindo o Painel...', icone: 'analytics' });
-            router.replace('/painel');
-        } else {
-            showToast({ titulo: 'Conexão confirmada!', descricao: 'Perfil CLIENTE ativo. Bem-vindo(a) de volta!' });
-            router.replace('/explorar');
-        }
+        router.replace(u.roles.includes('ADMIN') ? '/painel' : '/explorar');
     }
 
     async function handleLogin() {
@@ -91,7 +82,6 @@ export default function LoginCadastro() {
         const r = await signUp(nome, emailCadastro, senhaCadastro);
         setEnviando(false);
         if (r.ok && r.usuario) {
-            showToast({ titulo: `Seja bem-vindo(a), ${r.usuario.nome}!`, descricao: 'Conta criada com sucesso.', icone: 'celebration' });
             router.replace('/explorar');
         } else {
             setErro(r.error ?? 'Não foi possível criar a conta.');
@@ -104,7 +94,7 @@ export default function LoginCadastro() {
             <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
                 <View style={styles.card}>
                     {/* Marca + seletor de abas */}
-                    <View style={[styles.topo, !isMd && styles.topoMobile]}>
+                    <View style={styles.topo}>
                         <View style={styles.marca}>
                             <LogoBadge size={44} />
                             <Text style={styles.marcaNome}>Muuv</Text>
@@ -118,7 +108,7 @@ export default function LoginCadastro() {
                         </View>
                     </View>
 
-                    <View style={[styles.formulario, !isMd && styles.formularioMobile]}>
+                    <View style={styles.formulario}>
                         {aba === 'login' ? (
                             <View style={styles.campos}>
                                 <TextField
@@ -188,7 +178,7 @@ export default function LoginCadastro() {
                                     keyboardType="email-address"
                                     autoCapitalize="none"
                                 />
-                                <View style={[styles.senhas, isMd && styles.senhasLado]}>
+                                <View style={styles.senhas}>
                                     <TextField
                                         label="Senha"
                                         icone="lock"
@@ -304,7 +294,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: 'rgba(247, 243, 239, 0.7)',
     },
-    topoMobile: { paddingHorizontal: Spacing.lg },
     marca: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
     marcaNome: { ...Type.headlineMd, color: Colors.onSurface },
     tagline: { ...Type.bodySm, color: Colors.onSurfaceVariant, textAlign: 'center', maxWidth: 384 },
@@ -329,7 +318,6 @@ const styles = StyleSheet.create({
     abaAtiva: { backgroundColor: Colors.surfaceContainerLowest, ...Shadow.sm },
     abaTexto: { ...Type.labelLg, color: Colors.onSurfaceVariant },
     formulario: { paddingHorizontal: 32, paddingBottom: 32, paddingTop: Spacing.sm },
-    formularioMobile: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.lg },
     campos: { gap: Spacing.md },
     olho: { padding: 4, marginLeft: 6 },
     lembrar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 4, alignSelf: 'flex-start' },
@@ -353,8 +341,7 @@ const styles = StyleSheet.create({
     },
     erroTexto: { ...Type.bodySm, fontFamily: Fonts.medium, color: Colors.onErrorContainer, flex: 1 },
     botao: { marginTop: Spacing.sm, paddingVertical: 14, borderRadius: Radius.xxl },
-    senhas: { gap: 14 },
-    senhasLado: { flexDirection: 'row', gap: 12 },
+    senhas: { flexDirection: 'row', gap: 12 },
     senhaCampo: { flex: 1 },
     rodape: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap', marginTop: Spacing.sm },
     rodapeTexto: { ...Type.bodySm, color: Colors.onSurfaceVariant },

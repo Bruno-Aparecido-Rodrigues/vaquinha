@@ -2,7 +2,6 @@ import React from 'react';
 import { RefreshControl, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import AppHeader, { Aba } from './app-header';
 import AppFooter from './app-footer';
-import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { Colors } from '@/constants/colors';
 import { MAX_WIDTH, Spacing } from '@/constants/theme';
 
@@ -37,13 +36,8 @@ export function Container({ children, maxWidth = MAX_WIDTH, style }: {
     maxWidth?: number;
     style?: StyleProp<ViewStyle>;
 }) {
-    const { isMd } = useBreakpoint();
     return (
-        <View style={[
-            styles.container,
-            { maxWidth, paddingHorizontal: isMd ? Spacing.gutter : Spacing.gutterMobile },
-            style,
-        ]}>
+        <View style={[styles.container, { maxWidth, paddingHorizontal: Spacing.gutter }, style]}>
             {children}
         </View>
     );
