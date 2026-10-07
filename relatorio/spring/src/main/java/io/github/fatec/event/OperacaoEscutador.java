@@ -8,6 +8,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+// Escuta a fila relatorio.operacoes e atualiza o status de cada doação.
 @Component
 public class OperacaoEscutador {
 

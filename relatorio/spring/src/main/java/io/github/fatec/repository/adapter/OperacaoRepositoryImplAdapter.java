@@ -3,6 +3,7 @@ package io.github.fatec.repository.adapter;
 import io.github.fatec.entity.Operacao;
 import io.github.fatec.repository.orm.OperacaoOrm;
 
+/** Converte Operacao <-> OperacaoOrm. */
 public class OperacaoRepositoryImplAdapter {
 
     private OperacaoRepositoryImplAdapter() {}

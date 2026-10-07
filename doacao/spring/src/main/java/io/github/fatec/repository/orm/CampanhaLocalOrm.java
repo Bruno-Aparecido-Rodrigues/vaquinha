@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// Documento da coleção "campanha_local"; o @Version é a trava otimista.
 @Document("campanha_local")
 public record CampanhaLocalOrm(
         @Id String id,

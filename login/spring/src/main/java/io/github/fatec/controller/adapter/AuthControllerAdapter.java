@@ -5,6 +5,7 @@ import io.github.fatec.controller.response.AuthResponse;
 import io.github.fatec.entity.Login;
 import io.github.fatec.entity.User;
 
+/** Converte o pedido de login em Login e o usuário em AuthResponse. */
 public class AuthControllerAdapter {
     private AuthControllerAdapter() {
     }

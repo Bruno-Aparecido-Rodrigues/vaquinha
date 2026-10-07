@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+// Vaquinha no formato devolvido ao front
 public record CampanhaResponse(
         String id,
         String titulo,

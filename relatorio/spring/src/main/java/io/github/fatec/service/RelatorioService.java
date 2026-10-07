@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// Monta o histórico, uma linha por operação, sem voltar status já finalizado.
 @Service
 public class RelatorioService {
 
@@ -34,7 +35,7 @@ public class RelatorioService {
         Instant data = evento.data() != null ? evento.data() : Instant.now();
         Optional<Operacao> existente = repository.findById(evento.operacaoId());
 
-        // Uma operação finalizada nunca "volta" (ex.: PROCESSANDO atrasado depois de CONCLUIDA)
+        // Uma operação finalizada nunca "volta" (PROCESSANDO atrasado depois de CONCLUIDA)
         if (existente.isPresent() && existente.get().status().finalizado()) {
             log.warn("Operação {} já está {}; evento {} ignorado",
                     evento.operacaoId(), existente.get().status(), evento.status());
@@ -62,7 +63,7 @@ public class RelatorioService {
         ));
     }
 
-    // Evento de vaquinha (criada, atualizada...): vira uma linha já concluída.
+    // Evento de vaquinha (criada, atualizada...) vira uma linha já concluída.
     public void registrarEventoCampanha(CampanhaEvento evento) {
         if (evento.acao() == null) {
             throw new IllegalArgumentException("Evento de campanha sem ação: " + evento);

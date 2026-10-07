@@ -5,6 +5,7 @@ import io.github.fatec.entity.enumerable.StatusOperacao;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+// Uma linha do painel do ADMIN: uma operação de doação ou um evento de vaquinha.
 public record Operacao(
         String operacaoId,
         String tipo,

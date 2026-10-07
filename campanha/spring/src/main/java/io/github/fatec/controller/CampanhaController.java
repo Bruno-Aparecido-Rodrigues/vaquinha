@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+// Endpoints /campanha (CRUD) e tradução das exceções em códigos HTTP.
 @RestController
 @RequestMapping("/campanha")
 public class CampanhaController {
@@ -78,7 +79,7 @@ public class CampanhaController {
         return CampanhaControllerAdapter.toResponse(service.buscar(id));
     }
 
-    // --- Tratamento de erros (devolve { "mensagem": "..." } para o site) ---
+    // --- Tratamento de erros (devolve uma mensagem para o site) ---
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+// Escuta a fila campanha.doacao-realizada e soma a doação no total da vaquinha.
 @Component
 public class DoacaoRealizadaEscutador {
     private static final Logger logger = LoggerFactory.getLogger(DoacaoRealizadaEscutador.class);

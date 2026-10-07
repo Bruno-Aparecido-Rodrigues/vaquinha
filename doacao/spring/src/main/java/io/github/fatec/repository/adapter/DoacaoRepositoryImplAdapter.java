@@ -3,6 +3,7 @@ package io.github.fatec.repository.adapter;
 import io.github.fatec.entity.Doacao;
 import io.github.fatec.repository.orm.DoacaoOrm;
 
+// Converte Doacao <-> DoacaoOrm.
 public class DoacaoRepositoryImplAdapter {
 
     private DoacaoRepositoryImplAdapter() {}

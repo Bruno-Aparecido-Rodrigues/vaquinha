@@ -13,10 +13,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * O site só cria contas CLIENTE. A única conta ADMIN é criada aqui
- * quando o serviço sobe (somente se ainda não existir).
- */
+// O site só cria contas CLIENTE. A única conta ADMIN é criada aqui quando o serviço sobe (somente se ainda não existir).
+
 @Component
 public class AdminSeed implements ApplicationRunner {
     private static final Logger logger = LoggerFactory.getLogger(AdminSeed.class);

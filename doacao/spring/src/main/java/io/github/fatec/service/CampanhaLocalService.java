@@ -5,6 +5,7 @@ import io.github.fatec.event.dto.CampanhaEvento;
 import io.github.fatec.repository.CampanhaLocalRepository;
 import org.springframework.stereotype.Service;
 
+// Transforma o evento recebido da Campanha em cópia local atualizada.
 @Service
 public class CampanhaLocalService {
 

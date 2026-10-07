@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 /**
  * Por padrão o resource server só lê o token do cabeçalho Authorization.
  * Este conversor lê o token do cookie "access_token" (enviado automaticamente pelo navegador)
- * e, como alternativa, do cabeçalho Authorization: Bearer (útil para k6/Postman).
+ * e, como alternativa, do cabeçalho Authorization: Bearer
  *
  * Nas rotas públicas (login, cadastro, logout) o token é ignorado: assim um cookie
  * vencido não impede o usuário de fazer login de novo.

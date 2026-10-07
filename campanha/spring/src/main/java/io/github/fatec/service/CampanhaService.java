@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+// Regras de negócio da vaquinha, validar, criar, editar, excluir e somar doações.
 @Service
 public class CampanhaService {
     private static final int TITULO_MAX = 80;
@@ -87,7 +88,7 @@ public class CampanhaService {
 
         if (atual.totalDoacoes() > 0) {
             throw new IllegalStateException(
-                    "Campanhas que já receberam doações não podem ser excluídas. Encerre a campanha.");
+                    "Campanhas que já receberam doações não podem ser excluídas");
         }
 
         repository.delete(id);

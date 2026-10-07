@@ -8,6 +8,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+// Escuta a fila doacao.campanha-eventos e atualiza a cópia local da vaquinha.
 @Component
 public class CampanhaEventoEscutador {
 

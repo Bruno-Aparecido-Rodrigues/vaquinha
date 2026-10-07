@@ -16,7 +16,7 @@ import reactor.core.publisher.Flux;
 @Configuration
 public class SecurityConfig {
 
-    /** Rotas que não exigem login. */
+    //rotas publicas
     private static final String[] ROTAS_PUBLICAS = {
             "/login/auth",
             "/login/v1/create",
@@ -37,9 +37,9 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Login, cadastro e logout
                         .matchers(publicas).permitAll()
-                        // Área exclusiva do ADMIN (as regras específicas vêm antes da regra geral)
+                        // Área exclusiva do ADMIN
                         .pathMatchers("/relatorio/**").hasRole("ADMIN")
-                        // Todo o resto exige estar logado (CLIENTE ou ADMIN)
+                        // Todo o resto logado
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth -> oauth
@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    /** O token traz os perfis na claim "roles" já com o prefixo ROLE_ (ex.: ROLE_ADMIN). */
+    // O token traz os perfis na claim "roles" já com o ROLE_.
     @Bean
     public ReactiveJwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();

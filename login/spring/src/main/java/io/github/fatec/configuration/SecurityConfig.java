@@ -19,15 +19,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+//Spring Security sem sessão rotas públicas, BCrypt e o filtro do JWT
 @Configuration
 public class SecurityConfig {
 
-    @Bean
+    @Bean //criptografia da senha
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    @Bean //estrutura para validar o usuário na hora do login
     public AuthenticationManager authenticationManager(
             UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
@@ -37,29 +38,28 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
-    @Bean
+    @Bean// vai interceptar as requisições, ler o cookie, extrair/validar o token JWT e autenticar
     public SecurityFilterChain filterChain(
             HttpSecurity http,
             JwtSecurity jwtSecurity,
             CookieSecurity cookieSecurity,
             UserDetailsService userDetailsService) throws Exception {
-
+        
         JwtAuthFilterSecurity jwtFilter = new JwtAuthFilterSecurity(jwtSecurity, cookieSecurity, userDetailsService);
 
         http
-                // CORS fica no gateway: o front só conversa com o gateway
+                // CORS fica no gateway o front só conversa com o gateway
                 .cors(AbstractHttpConfigurer::disable)
-                // O cookie é SameSite=Strict, o que já impede CSRF entre sites
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Rotas públicas: login, cadastro e logout
+                        // Rotas públicas, login, cadastro e logout
                         .requestMatchers(
                                 "/login/auth",
                                 "/login/v1/create",
                                 "/login/v1/logout")
                         .permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()) // todo o resto privada se n tiver o jwt
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

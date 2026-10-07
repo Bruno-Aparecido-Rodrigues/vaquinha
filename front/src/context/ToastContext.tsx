@@ -25,7 +25,7 @@ const ICONES: Record<Tipo, IconName> = {
     info: 'info',
 };
 
-/** Aviso flutuante no rodapé (era o "auth-feedback-toast" dos mockups). */
+/** Aviso flutuante no rodapé. */
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
     const [toast, setToast] = useState<Toast | null>(null);
     const anim = useRef(new Animated.Value(0)).current;

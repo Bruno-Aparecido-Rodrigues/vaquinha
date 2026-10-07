@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+//Acesso ao MongoDB, consultas simples pelo client e $set/$inc pelo MongoTemplate.
 @Repository
 public class CampanhaRepositoryImpl implements CampanhaRepository {
     private final CampanhaRepositoryWithMongodb repository;
@@ -54,7 +55,7 @@ public class CampanhaRepositoryImpl implements CampanhaRepository {
         return findById(campanha.id());
     }
 
-    /** Exclusão lógica: o documento continua no banco, só fica com ativo = false. */
+    //Exclusão lógica, o documento continua no banco, só fica com ativo = false.
     @Override
     public void delete(String id) {
         Query query = new Query(Criteria.where("_id").is(id).and("ativo").is(true));

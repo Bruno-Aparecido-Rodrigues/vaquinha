@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 
-/** Valida a assinatura do JWT com a MESMA chave usada pelo serviço de Login. */
+// Valida a assinatura do JWT com a MESMA chave usada pelo serviço de Login.
 @Configuration
 public class JwtDecoderConfig {
 

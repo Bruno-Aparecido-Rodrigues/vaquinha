@@ -8,6 +8,7 @@ import io.github.fatec.service.dto.ResultadoDoacao;
 
 import java.math.BigDecimal;
 
+// Converte o resultado da doação e as doações para as respostas do front.
 public class DoacaoControllerAdapter {
 
     private DoacaoControllerAdapter() {}

@@ -5,6 +5,7 @@ import io.github.fatec.entity.enumerable.StatusOperacao;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+// Mensagem recebida da Doação com o status de uma operação.
 public record OperacaoEvento(
         String operacaoId,
         String tipo,

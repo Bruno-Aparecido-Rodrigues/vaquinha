@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
+// Uma tentativa dentro da transação: confere as regras, grava a doação e o novo total
 @Service
 public class RegistroDoacaoService {
 

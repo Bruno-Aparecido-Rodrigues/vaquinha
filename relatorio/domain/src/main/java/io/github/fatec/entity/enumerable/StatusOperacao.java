@@ -1,5 +1,6 @@
 package io.github.fatec.entity.enumerable;
 
+// Status de uma operação, finalizado() diz se ela já terminou.
 public enum StatusOperacao {
     PENDENTE,
     PROCESSANDO,

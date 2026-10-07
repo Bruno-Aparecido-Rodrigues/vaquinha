@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// Acesso ao MongoDB das operações (as 200 mais recentes para o painel).
 @Repository
 public class OperacaoRepositoryImpl implements OperacaoRepository {
 

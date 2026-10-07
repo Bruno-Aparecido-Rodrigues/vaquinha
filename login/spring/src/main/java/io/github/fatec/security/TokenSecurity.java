@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+/** Confere e-mail e senha no AuthenticationManager e pede o JWT. */
 @Component
 public class TokenSecurity {
     private final JwtSecurity jwtSecurity;

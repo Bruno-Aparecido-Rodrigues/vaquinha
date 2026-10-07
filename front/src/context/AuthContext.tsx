@@ -18,11 +18,7 @@ type AuthContextData = {
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-/**
- * Diferente do projeto da pokedex, aqui o token NÃO fica no AsyncStorage:
- * ele vive só no cookie HttpOnly, que o navegador guarda e envia sozinho.
- * O front guarda apenas os dados do usuário (nome, e-mail, perfis) em memória.
- */
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [isLoading, setIsLoading] = useState(true);

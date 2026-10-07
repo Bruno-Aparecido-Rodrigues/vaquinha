@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+/** Acesso ao MongoDB dos usuários; bloqueia e-mail duplicado e grava a senha com BCrypt. */
 @Repository
 public class UserRepositoryImpl implements UserRepository {
     private final PasswordEncoder encoder;

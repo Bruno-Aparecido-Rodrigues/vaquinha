@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// GET /relatorio/operacoes: lista para o painel, só para ADMIN.
 @RestController
 @RequestMapping("/relatorio")
 public class RelatorioController {

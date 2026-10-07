@@ -3,6 +3,7 @@ package io.github.fatec.repository.adapter;
 import io.github.fatec.entity.User;
 import io.github.fatec.repository.orm.UserOrm;
 
+/** Converte User <-> UserOrm. */
 public class UserRepositoryImplAdapter {
     private UserRepositoryImplAdapter() {
     }

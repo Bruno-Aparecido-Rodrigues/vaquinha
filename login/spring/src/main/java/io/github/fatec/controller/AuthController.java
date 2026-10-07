@@ -20,6 +20,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+// Endpoints /login: entrar, criar conta, quem sou eu (/me) e sair
 @RestController
 @RequestMapping("/login")
 public class AuthController {
@@ -37,7 +38,7 @@ public class AuthController {
         this.cookieSecurity = cookieSecurity;
     }
 
-    /** Cadastro (tela "Criar conta"): cria um CLIENTE e já devolve o cookie, então o usuário entra logado. */
+    // Cadastro (tela "Criar conta"): cria um CLIENTE e já devolve o cookie, então o usuário entra logado.
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/v1/create")
     public AuthResponse create(@RequestBody RegisterRequest request, HttpServletResponse response) {
@@ -73,7 +74,7 @@ public class AuthController {
         return AuthControllerAdapter.toResponse(userDetails.user());
     }
 
-    // ---------- Tratamento de erros (devolve { "mensagem": "..." } para o front) ----------
+    //Tratamento de erros pra mostrar no front
 
     @ExceptionHandler(DuplicateKeyException.class)
     @ResponseStatus(HttpStatus.CONFLICT)

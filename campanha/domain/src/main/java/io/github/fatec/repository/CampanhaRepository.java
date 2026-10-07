@@ -5,6 +5,7 @@ import io.github.fatec.entity.Campanha;
 import java.math.BigDecimal;
 import java.util.List;
 
+// Contrato do banco de vaquinhas, quem implementa é o CampanhaRepositoryImpl.
 public interface CampanhaRepository {
     Campanha save(Campanha campanha);
     Campanha update(Campanha campanha);

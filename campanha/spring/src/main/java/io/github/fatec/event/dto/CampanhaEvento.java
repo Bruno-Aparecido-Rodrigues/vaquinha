@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+// Mensagem enviada a cada criar, atualizar ou excluir uma vaquinha.
 public record CampanhaEvento(
        String acao,
        String campanhaId,

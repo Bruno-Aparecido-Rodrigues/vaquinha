@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+// Publica doacao.realizada (para a Campanha) e operacao.doacao (para o Relatório).
 @Component
 public class DoacaoPublicadorImpl implements DoacaoPublicador {
 

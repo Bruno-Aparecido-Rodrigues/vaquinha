@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 
+// Publica campanha.criada / .atualizada / .excluida na exchange vaquinha.eventos.
 @Component
 public class CampanhaPublicadorImpl implements CampanhaPublicador {
     private static final Logger logger = LoggerFactory.getLogger(CampanhaPublicadorImpl.class);
@@ -54,7 +55,7 @@ public class CampanhaPublicadorImpl implements CampanhaPublicador {
             rabbitTemplate.convertAndSend(exchange, routingKey, evento);
             logger.info("Evento publicado: {} -> {}", routingKey, campanha.id());
         } catch (Exception ex) {
-            // A campanha já foi salva no banco; uma falha no RabbitMQ não desfaz o CRUD
+            // A campanha já foi salva no banco uma falha no RabbitMQ não desfaz o CRUD
             logger.error("Falha ao publicar {} da campanha {}: {}", routingKey, campanha.id(), ex.getMessage());
         }
     }

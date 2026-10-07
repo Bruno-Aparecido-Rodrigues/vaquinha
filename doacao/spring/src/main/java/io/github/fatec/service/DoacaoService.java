@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+// Orquestra a doação: valida, tenta até 5 vezes em caso de conflito e publica os eventos.
 @Service
 public class DoacaoService {
 
@@ -57,7 +58,7 @@ public class DoacaoService {
             throw new IllegalArgumentException("O valor pode ter no máximo 2 casas decimais");
         }
 
-        // A vaquinha existe na cópia? (404) — e pega o título para o relatório
+        // A vaquinha existe na cópia? (404), e pega o título para o relatório
         String titulo = campanhaLocalRepository.findById(campanhaId)
                 .map(CampanhaLocal::titulo)
                 .orElseThrow(() -> new NoSuchElementException("Vaquinha não encontrada"));

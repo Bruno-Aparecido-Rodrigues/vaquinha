@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// Configura o RabbitMQ: exchange, conversor JSON e a fila de eventos das vaquinhas.
 @Configuration
 public class RabbitMQConfig {
 

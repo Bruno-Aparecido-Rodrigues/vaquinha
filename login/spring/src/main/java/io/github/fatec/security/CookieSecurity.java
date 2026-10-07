@@ -11,8 +11,7 @@ import java.util.Optional;
 
 /**
  * Centraliza o cookie de autenticação.
- * HttpOnly: o JavaScript do front não consegue ler o token (protege contra XSS).
- * SameSite=Strict: o navegador só envia o cookie em requisições do próprio site (protege contra CSRF).
+ * HttpOnly: o JavaScript do front não consegue ler o token
  */
 @Component
 public class CookieSecurity {
@@ -27,8 +26,8 @@ public class CookieSecurity {
     }
 
     /**
-     * @param lembrar true = cookie persistente (sobrevive ao fechar o navegador);
-     *                false = cookie de sessão (some ao fechar o navegador).
+     * @param lembrar true = cookie persistente (sobrevive ao fechar o navegador)
+     *                false = cookie de sessão (some ao fechar o navegador)
      */
     public ResponseCookie criar(String token, boolean lembrar) {
         ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from(ACCESS_TOKEN_COOKIE, token)
@@ -52,7 +51,7 @@ public class CookieSecurity {
                 .build();
     }
 
-    /** Lê o token do cookie; se não houver, aceita também o cabeçalho Authorization: Bearer (útil para testes com k6/Postman). */
+    // Lê o token do cookie; se não houver, aceita também o cabeçalho Authorization: Bearer
     public Optional<String> lerToken(HttpServletRequest request) {
         if (request.getCookies() != null) {
             Optional<String> doCookie = Arrays.stream(request.getCookies())

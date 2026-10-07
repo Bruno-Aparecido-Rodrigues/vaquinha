@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+// Endpoints /doacao (doar e listar doações) e tradução das exceções em HTTP.
 @RestController
 @RequestMapping("/doacao")
 public class DoacaoController {

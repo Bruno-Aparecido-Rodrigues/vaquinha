@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+//dados do negócio
 public record Campanha (
     String id,
     String titulo,

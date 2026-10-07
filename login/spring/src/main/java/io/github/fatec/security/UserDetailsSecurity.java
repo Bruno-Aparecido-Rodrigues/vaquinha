@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+/** Busca o usuário pelo e-mail para o Spring Security conferir a senha. */
 @Component
 public class UserDetailsSecurity implements UserDetailsService {
 

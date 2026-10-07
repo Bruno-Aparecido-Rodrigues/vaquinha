@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+// Adapta o User ao Spring Security (perfis viram ROLE_ADMIN / ROLE_CLIENTE).
 public record AuthUserDetails(
         User user
 ) implements UserDetails {
@@ -22,7 +23,6 @@ public record AuthUserDetails(
         return user.password();
     }
 
-    /** O "username" do Spring Security neste projeto é o e-mail. */
     @Override
     public String getUsername() {
         return user.email();

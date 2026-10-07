@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
+// Consultas automáticas do Spring Data (mais recentes primeiro).
 public interface OperacaoRepositoryWithMongodb extends MongoRepository<OperacaoOrm, String> {
     List<OperacaoOrm> findTop200ByOrderByInicioDesc();
 }

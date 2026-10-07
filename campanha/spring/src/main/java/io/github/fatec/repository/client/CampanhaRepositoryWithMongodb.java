@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+// Consultas automáticas do Spring Data (pelo nome do método).
 @Repository
 public interface CampanhaRepositoryWithMongodb extends MongoRepository<CampanhaOrm, String> {
     List<CampanhaOrm> findByAtivoTrue();

@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+// Documento da coleção "campanha" no MongoDB (dinheiro em Decimal128).
 @Document(collection = "campanha") //define que cada campanha vira um documento na colecao campanha
 public record CampanhaOrm(
     @Id //o campo vira _id no documento no mongo.

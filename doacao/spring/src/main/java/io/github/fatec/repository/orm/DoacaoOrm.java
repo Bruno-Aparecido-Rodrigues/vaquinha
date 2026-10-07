@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+// Documento da coleção "doacao" no MongoDB.
 @Document("doacao")
 public record DoacaoOrm(
         @Id String id,

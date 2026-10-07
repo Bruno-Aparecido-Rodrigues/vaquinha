@@ -3,6 +3,7 @@ package io.github.fatec.repository.adapter;
 import io.github.fatec.entity.Campanha;
 import io.github.fatec.repository.orm.CampanhaOrm;
 
+// Converte Campanha <-> CampanhaOrm (documento do MongoDB).
 public class CampanhaRepositoryImplAdapter {
     private CampanhaRepositoryImplAdapter() {
     }

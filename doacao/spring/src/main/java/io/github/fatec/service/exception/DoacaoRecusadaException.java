@@ -4,6 +4,7 @@ import io.github.fatec.entity.enumerable.MotivoRecusa;
 
 import java.math.BigDecimal;
 
+// Doação recusada por regra de negócio; carrega o motivo e o valor restante.
 public class DoacaoRecusadaException extends RuntimeException {
 
     private final MotivoRecusa motivo;

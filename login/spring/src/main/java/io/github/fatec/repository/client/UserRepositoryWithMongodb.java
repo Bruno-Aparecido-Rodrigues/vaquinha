@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/** Consultas automáticas do Spring Data (busca por e-mail). */
 @Repository
 public interface UserRepositoryWithMongodb extends MongoRepository<UserOrm, String> {
     Optional<UserOrm> findByEmail(String email);

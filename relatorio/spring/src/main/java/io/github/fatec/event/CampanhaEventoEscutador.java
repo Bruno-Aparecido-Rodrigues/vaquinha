@@ -8,6 +8,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+// Escuta a fila relatorio.campanha-eventos e registra os eventos do CRUD no painel.
 @Component
 public class CampanhaEventoEscutador {
 

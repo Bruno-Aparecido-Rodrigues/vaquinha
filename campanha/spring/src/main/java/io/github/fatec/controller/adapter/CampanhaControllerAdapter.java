@@ -10,11 +10,12 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+//Converte request -> Campanha e Campanha -> response.
 public class CampanhaControllerAdapter {
     private CampanhaControllerAdapter() {
     }
 
-    /** Nova campanha: o sistema define id, data de criação, criador, status e começa com zero arrecadado. */
+    // Nova campanha: o sistema define id, data de criação, criador, status e começa com zero arrecadado.
     public static Campanha cast(CampanhaRequest request, String usuarioId, String usuarioNome) {
         return new Campanha(
                 UUID.randomUUID().toString(),
@@ -31,10 +32,7 @@ public class CampanhaControllerAdapter {
                 true);
     }
 
-    /**
-     * Edição: só leva os campos editáveis. Os outros ficam nulos porque o service
-     * busca os valores verdadeiros no banco (arrecadado, criador, data de criação...).
-     */
+    //Edição: só leva os campos editáveis os outros ficam nulos porque o service busca os valores verdadeiros no banco
     public static Campanha cast(CampanhaUpdateRequest request) {
         return new Campanha(
                 request.id(),
@@ -66,7 +64,7 @@ public class CampanhaControllerAdapter {
                 campanha.status());
     }
 
-    /** Tira espaços sobrando no começo e no fim do texto. */
+    // Tira espaços sobrando no começo e no fim do texto.
     private static String limpar(String texto) {
         return texto == null ? null : texto.trim();
     }

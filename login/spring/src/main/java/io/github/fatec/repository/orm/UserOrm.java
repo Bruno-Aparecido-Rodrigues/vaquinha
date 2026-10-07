@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
+/** Documento da coleção "usuario" (e-mail único). */
 @Document(collection = "usuario")
 public record UserOrm(
         @Id

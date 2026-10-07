@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+// Lê do application.yaml as origens liberadas no CORS (o front).
 @Component
 @ConfigurationProperties(prefix = "app.cors")
 public class CorsProperties {

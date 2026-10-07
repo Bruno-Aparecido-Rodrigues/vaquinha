@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+// Acesso ao MongoDB da cópia local; sincronizar() faz upsert sem apagar o total.
 @Repository
 public class CampanhaLocalRepositoryImpl implements CampanhaLocalRepository {
 

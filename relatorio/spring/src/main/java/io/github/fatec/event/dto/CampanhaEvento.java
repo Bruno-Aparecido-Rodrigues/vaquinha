@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+// Mensagem recebida da Campanha (criada, atualizada, excluída).
 public record CampanhaEvento(
         String acao,
         String campanhaId,

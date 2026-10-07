@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+/** Uma linha do painel no formato que o front espera (campos nulos não vão no JSON). */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-// campos do tipo Operacao do front
 public record OperacaoResponse(
         String operacaoId,
         String tipo,

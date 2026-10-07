@@ -3,6 +3,7 @@ package io.github.fatec.repository.adapter;
 import io.github.fatec.entity.CampanhaLocal;
 import io.github.fatec.repository.orm.CampanhaLocalOrm;
 
+// Converte CampanhaLocal <-> CampanhaLocalOrm.
 public class CampanhaLocalRepositoryImplAdapter {
 
     private CampanhaLocalRepositoryImplAdapter() {}

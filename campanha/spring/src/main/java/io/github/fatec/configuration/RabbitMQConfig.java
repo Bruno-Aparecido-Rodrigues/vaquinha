@@ -15,11 +15,8 @@ import org.springframework.amqp.core.Queue;
 
 @Configuration
 public class RabbitMQConfig {
-
-    /**
-     * Exchange do tipo TOPIC: todos os serviços publicam nela e cada serviço
-     * interessado liga a SUA fila, escolhendo quais mensagens quer receber (Pub/Sub).
-     */
+    //Exchange do tipo TOPIC: todos os serviços publicam nela e cada serviço
+    //interessado liga a SUA fila, escolhendo quais mensagens quer receber, Pub/Sub
     @Bean
     public TopicExchange eventosExchange(@Value("${event.exchange}") String exchange) {
         return new TopicExchange(exchange, true, false);
@@ -37,13 +34,13 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
-    /** Fila própria da Campanha para receber as doações confirmadas. */
+    // Fila própria da Campanha para receber as doações confirmadas.
     @Bean
     public Queue doacaoRealizadaQueue(@Value("${event.doacao-realizada.queue}") String queue) {
         return new Queue(queue, true);
     }
 
-    /** Inscreve a fila na exchange: só recebe mensagens com a etiqueta "doacao.realizada". */
+    // Inscreve a fila na exchange, só recebe mensagens com a etiqueta "doacao.realizada".
     @Bean
     public Binding doacaoRealizadaBinding(
             Queue doacaoRealizadaQueue,
